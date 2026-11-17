@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'required' => ':attribute wajib diisi.',
+    'required_if' => ':attribute wajib diisi untuk pilihan ini.',
+    'email' => 'Masukkan alamat email yang valid.',
+    'unique' => ':attribute sudah digunakan.',
+    'confirmed' => 'Konfirmasi :attribute tidak sama.',
+    'in' => 'Pilihan :attribute tidak valid.',
+    'exists' => 'Pilihan :attribute tidak ditemukan.',
+    'distinct' => 'Pilihan :attribute tidak boleh berulang.',
+    'integer' => ':attribute harus berupa bilangan bulat.',
+    'numeric' => ':attribute harus berupa angka.',
+    'string' => ':attribute harus berupa teks.',
+    'array' => 'Format :attribute tidak valid.',
+    'regex' => 'Format :attribute tidak valid.',
+    'date_format' => 'Masukkan :attribute yang valid.',
+    'after_or_equal' => ':attribute harus pada atau setelah :date.',
+    'after' => ':attribute harus setelah :date.',
+    'file' => 'Pilih file untuk :attribute.',
+    'mimes' => 'Format :attribute harus :values.',
+    'uploaded' => 'Unggahan :attribute gagal. Coba file yang lebih kecil.',
+    'min' => ['numeric' => ':attribute minimal :min.', 'string' => ':attribute minimal :min karakter.'],
+    'max' => ['numeric' => ':attribute maksimal :max.', 'string' => ':attribute maksimal :max karakter.', 'file' => ':attribute maksimal :max KB.', 'array' => ':attribute maksimal :max pilihan.'],
+    'between' => ['numeric' => ':attribute harus antara :min dan :max.'],
+    'attributes' => ['name' => 'Nama lengkap', 'email' => 'Email', 'password' => 'Password', 'no_telepon' => 'Nomor telepon', 'peran' => 'Peran', 'tanggal_mulai' => 'Tanggal mulai', 'tanggal_selesai' => 'Tanggal selesai', 'alasan' => 'Alasan penolakan', 'catatan' => 'Catatan', 'rating' => 'Rating', 'foto.*' => 'Foto tempat'],
+];

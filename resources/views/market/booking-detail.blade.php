@@ -1,0 +1,15 @@
+@extends('market.layout')
+@section('title',$owner?'Detail Pengajuan Booking':'Ringkasan pengajuan')
+@section('content')
+@if($owner)
+@include('market.pagehead',['heading'=>'Detail Pengajuan Booking','parent'=>'Booking Masuk','parentUrl'=>'/pemilik/booking','description'=>$b->tempat->nama_tempat])
+<div class="frame detail workarea"><div class="flow"><section class="panel"><h2>Penyewa</h2><b>{{$b->penyewa->name}}</b><p>{{$b->penyewa->email}} · {{$b->penyewa->no_telepon}}</p></section>
+<section class="panel"><h2>Tempat yang diajukan</h2><h3>{{$b->tempat->nama_tempat}}</h3><p>{{$b->tempat->lokasi}}</p></section><section class="panel"><h2>Periode sewa</h2><dl class="spec-list"><dt>Tanggal mulai</dt><dd>{{$b->tanggal_mulai}}</dd><dt>Tanggal selesai</dt><dd>{{$b->tanggal_selesai}}</dd></dl></section><section class="panel"><h2>Catatan penyewa</h2><p>{{$b->catatan ?: 'Tidak ada catatan.'}}</p></section>
+@else
+<div class="frame confirmation workarea"><img src="/media/imgIkonCheck.svg" class="successmark" alt=""><h1>{{session('submitted')?'Pengajuan Anda tersimpan':'Ringkasan pengajuan'}}</h1>@if(session('submitted'))<p>Pemilik tempat sudah diberi tahu dan akan mengonfirmasi pengajuan Anda. Kami akan memberi tahu Anda setelah ada keputusan.</p>@endif
+<section class="panel"><h2>Ringkasan pengajuan</h2><dl class="pricelines"><div><dt>Tempat</dt><dd>{{$b->tempat->nama_tempat}}</dd></div><div><dt>Periode</dt><dd>{{$b->tanggal_mulai}} – {{$b->tanggal_selesai}}</dd></div><div><dt>Status booking</dt><dd>{{ucfirst(strtolower(str_replace('_',' ',$b->status_booking)))}}</dd></div><div><dt>Status tempat</dt><dd>{{ucfirst(strtolower(str_replace('_',' ',$b->tempat->status_tempat)))}}</dd></div></dl></section>
+@endif
+@if($terms)<div class="panel"><h2>Ringkasan biaya saat pengajuan</h2><dl class="pricelines"><div><dt>Harga sewa pokok</dt><dd>Rp {{number_format($terms['harga'],0,',','.')}} / {{$terms['satuan']}}</dd></div>@foreach($terms['biaya'] as $fee)<div><dt>{{$fee['nama_biaya']}}</dt><dd>Rp {{number_format($fee['nominal'],0,',','.')}}</dd></div>@endforeach</dl><p>Pembayaran langsung kepada pemilik. {{$terms['pembayaran']}}</p></div>@endif
+@if($owner)</div><aside class="panel stack"><h2>Keputusan</h2><p class="infostrip">Status booking · {{ucfirst(strtolower(str_replace('_',' ',$b->status_booking)))}}</p>
+@if($b->status_booking==='MENUNGGU_KONFIRMASI')<form class="stack" method="post" action="/pemilik/booking/{{$b->id_booking}}/keputusan">@csrf<label>Alasan jika ditolak<textarea name="alasan">{{old('alasan')}}</textarea></label><button name="status" value="DIKONFIRMASI">Konfirmasi Booking</button><button class="secondary" name="status" value="DITOLAK" onclick="return confirm('Tolak booking ini?')">Tolak Booking</button></form>@endif @if($b->alasan_penolakan)<p>{{$b->alasan_penolakan}}</p>@endif<a href="/pemilik/booking">Kembali ke Booking Masuk</a></aside>
+@else @if($b->alasan_penolakan)<p>{{$b->alasan_penolakan}}</p>@endif <div class="actions"><a class="btn" href="/booking">Lihat Booking Saya</a><a class="btn secondary" href="/cari">Cari Lapak</a></div>@endif</div>@endsection

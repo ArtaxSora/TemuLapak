@@ -1,0 +1,1 @@
+<section class="panel"><h2>Aturan sewa</h2><dl class="spec-list">@foreach(['durasi_minimal'=>'Durasi minimal','perpanjangan'=>'Perpanjangan','sistem_pembayaran'=>'Pembayaran','ketentuan_pembatalan'=>'Pembatalan','denda_keterlambatan'=>'Denda keterlambatan'] as $k=>$label)<dt>{{$label}}</dt><dd>{{$rules?->$k??'Belum dicantumkan'}}</dd>@endforeach</dl></section>

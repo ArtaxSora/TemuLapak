@@ -1,0 +1,1 @@
+<section class="pagehead"><div class="frame"><nav aria-label="Lokasi halaman"><a href="/">Beranda</a> › @isset($parent)<a href="{{$parentUrl}}">{{$parent}}</a> › @endisset {{$heading}}</nav><h1>{{$heading}}</h1>@isset($description)<p>{{$description}}</p>@endisset</div></section>
