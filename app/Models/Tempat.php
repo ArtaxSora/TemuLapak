@@ -18,6 +18,36 @@ class Tempat extends Model
 
     protected $primaryKey = 'id_tempat';
 
+    public function bookingTerms(): array
+    {
+        return [
+            'harga' => $this->harga_sewa, 'satuan' => $this->satuan_harga,
+            'biaya' => $this->fees->map(fn ($fee) => $fee->only(['nama_biaya', 'nominal', 'periode', 'metode', 'satuan_pemakaian', 'perkiraan_pemakaian']))->all(),
+            'durasi_minimal' => $this->rules?->durasi_minimal,
+            'pembayaran' => $this->rules?->sistem_pembayaran,
+            'pembatalan' => $this->rules?->ketentuan_pembatalan,
+        ];
+    }
+
+    public function verificationIssue(): ?string
+    {
+        if ($this->photos->isEmpty()) {
+            return 'Belum ada foto';
+        }
+        foreach ($this->photos as $photo) {
+            $root = realpath(public_path());
+            $path = realpath(public_path(ltrim($photo->url_foto, '/')));
+            if (! $path || ! str_starts_with($path, $root.DIRECTORY_SEPARATOR) || ! is_file($path) || ! @getimagesize($path)) {
+                return 'Data rusak: foto tidak bisa dibuka';
+            }
+        }
+        if (! $this->rules) {
+            return 'Aturan sewa belum lengkap';
+        }
+
+        return null;
+    }
+
     public function pemilik(): BelongsTo
     {
         return $this->belongsTo(User::class, 'id_pemilik');

@@ -10,6 +10,7 @@ use App\Models\Tempat;
 use App\Models\TempatFasilitas;
 use App\Models\Ulasan;
 use App\Support\Marketplace;
+use App\Support\Rupiah;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -43,15 +44,12 @@ class ListingController extends Controller
             }
         }
         foreach (['min', 'max'] as $key) {
-            $amount = $r->input($key);
-            if (is_string($amount) && preg_match('/^(?:Rp\s*)?(?:\d{1,3}(?:\.\d{3})+|\d+)$/i', $amount)) {
-                $r->merge([$key => preg_replace('/[^0-9]/', '', $amount)]);
-            }
+            $r->merge([$key => Rupiah::normalize($r->input($key))]);
         }
         $r->validate([
             'lokasi' => 'nullable|string|max:255',
-            'min' => 'nullable|numeric|min:0',
-            'max' => ['nullable', 'numeric', 'min:0', ...($r->filled('min') ? ['gte:min'] : [])],
+            'min' => 'nullable|numeric|regex:/^[0-9]+$/|min:0|max:99999999999999',
+            'max' => ['nullable', 'numeric', 'regex:/^[0-9]+$/', 'min:0', 'max:99999999999999', ...($r->filled('min') ? ['gte:min'] : [])],
             'jenis' => 'nullable|array', 'jenis.*' => Rule::in(array_keys($placeTypes)),
             'periode' => 'nullable|array', 'periode.*' => Rule::in(array_keys($periods)),
             'fasilitas' => 'nullable|array', 'fasilitas.*' => 'integer',
@@ -131,7 +129,7 @@ class ListingController extends Controller
 
     public function queue(Request $r)
     {
-        return view('market.listings', ['title' => 'Antrean Verifikasi', 'items' => Marketplace::cards()->with('pemilik')->where('status_verifikasi', $r->input('status', 'MENUNGGU'))->orderBy('updated_at')->paginate(15)->withQueryString()]);
+        return view('market.listings', ['title' => 'Antrean Verifikasi', 'items' => Marketplace::cards()->with(['pemilik', 'photos', 'rules'])->where('status_verifikasi', $r->input('status', 'MENUNGGU'))->orderBy('updated_at')->paginate(15)->withQueryString()]);
     }
 
     public function form(Request $r, ?int $id = null)
@@ -143,18 +141,41 @@ class ListingController extends Controller
 
     public function save(Request $r, ?int $id = null)
     {
-        $listing = $r->validate(['alamat_lengkap' => 'nullable|string|max:255', 'ukuran' => 'nullable|string|max:80', 'nama_tempat' => 'required|string|max:255', 'jenis_tempat' => 'required|in:BOOTH,KIOS,RUKO', 'lokasi' => 'required|string|max:255', 'harga_sewa' => 'required|numeric|min:1|max:99999999999999', 'satuan_harga' => 'required|in:hari,minggu,bulan,tahun', 'kondisi_tempat' => 'required|string|max:3000', 'deskripsi' => 'nullable|string|max:6000']);
+        $r->merge(['harga_sewa' => Rupiah::normalize($r->input('harga_sewa'))]);
+        if (is_array($r->input('biaya'))) {
+            $fees = $r->input('biaya');
+            foreach ($fees as &$fee) {
+                if (is_array($fee) && array_key_exists('nominal', $fee)) {
+                    $fee['nominal'] = ($fee['metode'] ?? 'tetap') === 'termasuk' ? 0 : Rupiah::normalize($fee['nominal']);
+                }
+            }
+            unset($fee);
+            $r->merge(['biaya' => $fees]);
+        }
+        $listing = $r->validate(['alamat_lengkap' => 'nullable|string|max:255', 'ukuran' => 'nullable|string|max:80', 'nama_tempat' => 'required|string|max:255', 'jenis_tempat' => 'required|in:BOOTH,KIOS,RUKO', 'lokasi' => 'required|string|max:255', 'harga_sewa' => 'required|numeric|regex:/^[0-9]+$/|min:1|max:99999999999999', 'satuan_harga' => 'required|in:hari,minggu,bulan,tahun', 'kondisi_tempat' => 'required|string|max:3000', 'deskripsi' => 'nullable|string|max:6000']);
         $rules = $r->validate(['durasi_minimal' => 'required|string|max:255', 'perpanjangan' => 'required|string|max:2000', 'sistem_pembayaran' => 'required|string|max:2000', 'ketentuan_pembatalan' => 'required|string|max:2000', 'denda_keterlambatan' => 'required|string|max:2000']);
-        $r->validate(['fasilitas' => 'nullable|array', 'fasilitas.*' => ['distinct', Rule::exists(Fasilitas::class, 'id_fasilitas')], 'foto' => 'nullable|array|max:8', 'foto.*' => 'file|mimes:jpg,jpeg,png|max:2048', 'hapus' => 'nullable|array', 'hapus.*' => 'integer', 'biaya' => 'nullable|array|max:50', 'biaya.*.nama' => 'nullable|string|max:255', 'biaya.*.nominal' => 'nullable|numeric|min:0|max:99999999999999']);
+        $r->validate(['fasilitas' => 'nullable|array', 'fasilitas.*' => ['distinct', Rule::exists(Fasilitas::class, 'id_fasilitas')], 'foto' => 'nullable|array|max:8', 'foto.*' => 'file|mimes:jpg,jpeg,png|max:2048', 'hapus' => 'nullable|array', 'hapus.*' => 'integer', 'biaya' => 'nullable|array|max:50', 'biaya.*' => 'array', 'biaya.*.metode' => 'nullable|in:termasuk,tetap,pemakaian', 'biaya.*.periode' => 'nullable|in:hari,minggu,bulan,tahun', 'biaya.*.satuan_pemakaian' => 'nullable|string|max:30', 'biaya.*.perkiraan_pemakaian' => 'nullable|numeric|min:0|max:1000000', 'biaya.*.nama' => 'nullable|string|max:255', 'biaya.*.nominal' => 'nullable|numeric|regex:/^[0-9]+$/|min:0|max:99999999999999']);
         $fees = [];
-        foreach ($r->input('biaya', []) as $row) {
+        foreach ($r->input('biaya', []) as $key => $row) {
+            $mode = $row['metode'] ?? 'tetap';
+            if ($mode === 'termasuk') {
+                $row['nominal'] = 0;
+            }
             if (blank($row['nama'] ?? null) && blank($row['nominal'] ?? null)) {
                 continue;
             }
             if (blank($row['nama'] ?? null) || blank($row['nominal'] ?? null)) {
                 throw ValidationException::withMessages(['biaya' => 'Isi nama dan nominal untuk setiap biaya.']);
             }
-            $fees[] = ['nama_biaya' => $row['nama'], 'nominal' => $row['nominal']];
+            if ($mode === 'pemakaian' && (blank($row['satuan_pemakaian'] ?? null) || (float) $row['nominal'] <= 0)) {
+                throw ValidationException::withMessages(["biaya.$key.nominal" => 'Isi tarif lebih dari 0 dan satuan pemakaian.']);
+            }
+            $fees[] = [
+                'nama_biaya' => $row['nama'], 'nominal' => $row['nominal'],
+                'periode' => $row['periode'] ?? $listing['satuan_harga'], 'metode' => $mode,
+                'satuan_pemakaian' => $mode === 'pemakaian' ? $row['satuan_pemakaian'] : null,
+                'perkiraan_pemakaian' => $mode === 'pemakaian' ? ($row['perkiraan_pemakaian'] ?? null) : null,
+            ];
         }
         $written = [];
         try {
@@ -215,8 +236,8 @@ class ListingController extends Controller
             if ($item->status_verifikasi !== 'MENUNGGU') {
                 throw ValidationException::withMessages(['status' => 'Listing ini sudah diproses.']);
             }
-            if ($data['status'] === 'DISETUJUI' && (! FotoTempat::query()->where('id_tempat', $id)->exists() || ! AturanSewa::query()->where('id_tempat', $id)->exists())) {
-                throw ValidationException::withMessages(['status' => 'Foto dan aturan sewa wajib lengkap sebelum persetujuan.']);
+            if ($data['status'] === 'DISETUJUI' && ($issue = $item->verificationIssue())) {
+                throw ValidationException::withMessages(['status' => $issue.'. Lengkapi data sebelum persetujuan.']);
             }
             $query->update(['status_verifikasi' => $data['status'], 'id_admin' => $r->user()->id, 'catatan_verifikasi' => $data['catatan'] ?? null, 'diverifikasi_pada' => now(), 'updated_at' => now()]);
             Marketplace::notify($item->id_pemilik, 'Hasil verifikasi tempat', $item->nama_tempat.' '.strtolower($data['status']).'. '.($data['catatan'] ?? ''), 'VERIFIKASI');

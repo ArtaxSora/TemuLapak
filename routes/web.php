@@ -39,6 +39,7 @@ Route::middleware(Role::class.':ADMIN')->prefix('admin')->group(function () {
     Route::post('/pengguna/{id}', [AccountController::class, 'saveUser']);
 });
 Route::middleware(Role::class.':PENYEWA')->group(function () {
+    Route::get('/tempat/{id}/estimasi', [BookingController::class, 'estimate'])->whereNumber('id');
     Route::get('/tempat/{id}/booking', [ListingController::class, 'bookingForm']);
     Route::post('/tempat/{id}/booking', [BookingController::class, 'requestBooking']);
     Route::get('/booking', [BookingController::class, 'history']);

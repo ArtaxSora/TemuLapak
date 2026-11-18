@@ -1,0 +1,2 @@
+@php($paths = ['check'=>'m5 12 4 4L19 6','close'=>'m6 6 12 12M18 6 6 18','clock'=>'M12 7v5l3 2','info'=>'M12 11v6M12 7h.01','alert'=>'M12 9v4M12 16h.01'])
+<svg class="table-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">@if(in_array($icon,['clock','info']))<circle cx="12" cy="12" r="9"/>@elseif($icon==='alert')<path d="M12 3 2 21h20Z"/>@endif<path d="{{$paths[$icon]}}"/></svg>

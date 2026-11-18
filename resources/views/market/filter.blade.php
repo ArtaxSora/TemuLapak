@@ -17,8 +17,8 @@
         <legend>Rentang harga sewa</legend>
         @foreach(['min'=>['Minimum','Rp 1.000.000'],'max'=>['Maksimum','Rp 7.000.000']] as $field=>[$label,$example])
             <label>{{$label}}
-                <input type="text" inputmode="numeric" name="{{$field}}" data-rupiah
-                    value="{{request()->filled($field)?'Rp '.number_format((float)request($field),0,',','.'):''}}" placeholder="{{$example}}">
+                <input type="text" inputmode="numeric" name="{{$field}}" data-money
+                    value="{{request()->filled($field)?number_format((float)request($field),0,',','.'):''}}" placeholder="{{$example}}">
             </label>
         @endforeach
     </fieldset>

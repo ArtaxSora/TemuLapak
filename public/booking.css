@@ -1,0 +1,66 @@
+.booking-ui .pagehead nav{flex-wrap:wrap;gap:10px;font-size:12px;line-height:20px}
+.booking-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(300px,1fr);gap:28px;align-items:start}
+.booking-sections{display:grid;gap:22px;min-width:0}
+.booking-ui .panel{padding:28px;border:1px solid var(--line);border-radius:14px;box-shadow:none}
+.booking-ui h2{font-size:18px;line-height:26px;font-weight:600;margin:0 0 16px;letter-spacing:-.02em}
+.booking-ui h3{font-size:18px;line-height:26px;font-weight:600;margin:0 0 4px}
+.booking-place{display:flex;align-items:center;gap:18px}
+.booking-place>img{width:106px;height:86px;border-radius:10px;object-fit:cover;flex-shrink:0}
+.booking-place .location{font-size:13px;line-height:20px;margin:0 0 6px;gap:6px}
+.booking-place .location img{width:16px;height:16px}
+.booking-ui .table-icon{width:16px;height:16px;flex-shrink:0}
+.booking-ui .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;font-size:12px;line-height:18px;font-weight:500;white-space:nowrap}
+.booking-ui .badge .table-icon{width:13px;height:13px}
+.booking-ui .menunggu_konfirmasi{background:#fff0cc;color:#805300}
+.booking-ui .tersedia,.booking-ui .dikonfirmasi{background:#dcf0e3;color:#1e5b38}
+.booking-ui .ditolak{background:#fbded9;color:#a02b21}
+.booking-ui .dibatalkan,.booking-ui .terisi{background:#e8e8e5;color:#50504b}
+.booking-period label{font-size:13px;line-height:20px;font-weight:500;gap:7px}
+.booking-period input,.booking-period textarea{font-size:14px;font-weight:400;border:1px solid #789595;border-radius:9px;padding:12px 14px;min-height:44px}
+.booking-period textarea{min-height:100px;resize:vertical}
+.booking-period small{font-size:12px;line-height:18px;letter-spacing:0;font-weight:400;color:var(--muted)}
+.booking-duration{display:flex;align-items:flex-start;gap:9px;background:var(--soft);border-radius:9px;padding:12px 14px;color:var(--ink);font-size:12px;line-height:18px;margin:16px 0}
+.booking-duration .table-icon{color:#287578;margin-top:1px}
+.booking-duration.is-invalid{background:#fff0e9;color:#9b3928}
+.booking-duration.is-invalid .table-icon{color:inherit}
+.booking-rules ul{padding:0;margin:0 0 20px;list-style:none;display:grid;gap:14px}
+.booking-rules li{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:22px}
+.booking-rules li .table-icon{color:#287578;margin-top:3px}
+.booking-rules summary{font-size:14px;font-weight:600;display:list-item;margin-left:16px}
+.booking-rules details .panel{border:0;padding:20px 0 0}
+.booking-rules details dt,.booking-rules details dd{font-size:14px}
+.booking-ui .booking-cost{position:sticky;top:calc(var(--header-height,73px) + 24px);padding:26px 24px;box-shadow:0 2px 5px #243f3f0d}
+.booking-cost-lines{margin:0;display:grid;gap:16px}
+.booking-cost-lines>div{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;font-size:14px;line-height:20px}
+.booking-cost-lines dt{min-width:0;color:var(--muted)}
+.booking-cost-lines small{display:block;margin-top:3px;font-size:11px;line-height:16px;font-weight:400;letter-spacing:0;color:var(--muted)}
+.booking-cost-lines dd{margin:0;text-align:right;white-space:nowrap;font-weight:500}
+.booking-total{display:flex;align-items:baseline;justify-content:space-between;gap:16px;border-top:1px solid var(--line);padding-top:16px;margin-top:18px;font-size:14px}
+.booking-total strong{font-size:20px;line-height:28px;white-space:nowrap;font-weight:600}
+.booking-cost-note{font-size:11px;line-height:16px;margin:16px 0 0}
+.booking-cost>button{width:100%;font-size:14px;font-weight:500;line-height:20px;border-radius:9px;margin-top:16px}
+.booking-cost .booking-retry{background:white;color:var(--ink)}
+.booking-cost .booking-retry[hidden]{display:none}
+.booking-cancel{display:block;text-align:center;margin-top:16px;font-size:14px;font-weight:500;text-decoration:none;padding:6px}
+.booking-confirmation{max-width:720px;display:grid;gap:24px;text-align:center;padding-block:80px 96px}
+.booking-confirmation-heading{margin-bottom:8px}
+.booking-success-icon{display:grid;place-items:center;background:#dcf0e3;color:#287349;width:88px;height:88px;border-radius:50%;margin:0 auto 28px}
+.booking-success-icon .table-icon{width:30px;height:30px;stroke-width:1.5}
+.booking-confirmation h1{font-size:36px;line-height:46px;margin:0 0 24px;letter-spacing:-.035em}
+.booking-confirmation-heading>p{font-size:16px;line-height:26px;margin:0;color:var(--muted)}
+.booking-confirmation>.panel{text-align:left;width:100%;padding:30px}
+.booking-summary-lines{margin:0;display:grid;gap:16px;font-size:14px;line-height:22px}
+.booking-summary-lines>div{display:flex;justify-content:space-between;align-items:center;gap:22px}
+.booking-summary-lines dt{color:var(--muted);flex-shrink:0}
+.booking-summary-lines dd{text-align:right;margin:0;font-weight:500}
+.booking-status-row{border-top:1px solid var(--line);padding-top:18px;margin-top:2px}
+.booking-application-summary .booking-duration{margin:16px 0 0;font-weight:400}
+.booking-confirmation>.actions{justify-content:center;gap:14px;margin-top:6px}
+.booking-confirmation .actions .btn{border-radius:9px;font-size:14px;line-height:22px;padding:12px 22px;font-weight:500}
+@media(max-width:950px){.booking-grid{grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);gap:20px}.booking-ui .panel{padding:22px}.booking-period .pair{grid-template-columns:1fr}.booking-confirmation{max-width:680px}}
+@media(max-width:720px){.booking-grid{grid-template-columns:1fr;padding-block:28px 56px}.booking-ui .booking-cost{position:static}.booking-ui .pagehead h1{font-size:30px;line-height:38px}.booking-place{gap:12px}.booking-place>img{width:82px;height:82px}.booking-place h3{font-size:16px;line-height:23px}.booking-confirmation{padding-block:44px 60px;gap:18px}.booking-confirmation h1{font-size:28px;line-height:36px;margin-bottom:16px}.booking-confirmation-heading>p{font-size:14px;line-height:22px}.booking-confirmation>.panel{padding:22px}.booking-summary-lines>div{gap:12px;align-items:flex-start}.booking-summary-lines>div:nth-child(2){flex-direction:column;gap:4px}.booking-summary-lines>div:nth-child(2) dd{text-align:left}.booking-cost-lines>div{gap:12px}.booking-total strong{font-size:18px}.booking-success-icon{width:76px;height:76px;margin-bottom:24px}}
+
+body:has(.booking-ui) .account-link>img{width:36px;height:36px;padding:9px;border-radius:50%;background:#c4dfdf}
+body:has(.booking-ui) .sitehead form[action="/keluar"] button{border:0;background:none;padding-inline:14px;font-weight:500}
+
+.estimate-unknown{display:block;font-size:11px;font-weight:400;letter-spacing:0;color:var(--muted);margin-top:4px}

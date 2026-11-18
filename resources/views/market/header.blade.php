@@ -15,3 +15,14 @@ $links = match($role) {
 @if($role!=='ADMIN')<a class="utility" href="/notifikasi"><img src="/media/imgIkonBell.svg" alt="">Notifikasi @if($user->notifikasi()->whereNull('dibaca_pada')->exists())<span aria-label="Belum dibaca" class="unread"></span>@endif</a>@endif
 <details class="menu"><summary class="account-link"><img src="/media/imgIkonUser.svg" alt=""><span>{{$user->name}}<small>{{ucfirst(strtolower($role))}}</small></span></summary><div><a href="/profil">Profil</a>@if($role==='ADMIN')<a href="/admin/pengguna">Kelola pengguna</a><a href="/notifikasi">Notifikasi</a>@elseif($role==='PEMILIK')<a href="/pemilik/laporan">Laporan booking</a><a href="/pemilik/ulasan">Ulasan tempat</a>@endif</div></details>
 <form method="post" action="/keluar">@csrf<button class="secondary">Keluar</button></form>@endguest</div></div></header>
+
+<script>
+{
+    const header = document.querySelector('.sitehead');
+    const updateHeaderHeight = () => {
+        document.documentElement.style.setProperty('--header-height', header.offsetHeight + 'px');
+    };
+    updateHeaderHeight();
+    new ResizeObserver(updateHeaderHeight).observe(header);
+}
+</script>

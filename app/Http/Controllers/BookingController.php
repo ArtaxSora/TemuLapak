@@ -2,20 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AturanSewa;
-use App\Models\BiayaTambahan;
 use App\Models\Booking;
 use App\Models\Tempat;
 use App\Models\Ulasan;
+use App\Support\BookingEstimate;
 use App\Support\Marketplace;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class BookingController extends Controller
 {
+    private function dates(Request $r): array
+    {
+        return $r->validate([
+            'tanggal_mulai' => 'required|date_format:Y-m-d|after_or_equal:'.now('Asia/Jakarta')->toDateString(),
+            'tanggal_selesai' => 'required|date_format:Y-m-d|after_or_equal:tanggal_mulai',
+            'catatan' => 'nullable|string|max:2000',
+        ]);
+    }
+
+    public function estimate(Request $r, int $id)
+    {
+        $dates = $this->dates($r);
+        $item = Tempat::with(['rules', 'fees'])->where('status_verifikasi', 'DISETUJUI')->findOrFail($id);
+        abort_unless($item->status_tempat === 'TERSEDIA', 409, 'Tempat sudah tidak tersedia.');
+
+        return response()->json(BookingEstimate::calculate($dates['tanggal_mulai'], $dates['tanggal_selesai'], $item->bookingTerms()));
+    }
+
     public function requestBooking(Request $r, int $id)
     {
-        $dates = $r->validate(['tanggal_mulai' => 'required|date_format:Y-m-d|after_or_equal:'.now('Asia/Jakarta')->toDateString(), 'tanggal_selesai' => 'required|date_format:Y-m-d|after:tanggal_mulai', 'catatan' => 'nullable|string|max:2000']);
+        $dates = $this->dates($r);
         Marketplace::expire();
         $bookingId = Tempat::resolveConnection()->transaction(function () use ($r, $id, $dates) {
             $item = Tempat::query()->where('id_tempat', $id)->lockForUpdate()->firstOrFail();
@@ -23,8 +40,11 @@ class BookingController extends Controller
             if ($item->status_verifikasi !== 'DISETUJUI' || $item->status_tempat !== 'TERSEDIA' || $overlap) {
                 throw ValidationException::withMessages(['booking' => 'Tempat sudah tidak tersedia.']);
             }
-            $rules = AturanSewa::query()->where('id_tempat', $id)->first();
-            $terms = ['harga' => $item->harga_sewa, 'satuan' => $item->satuan_harga, 'biaya' => BiayaTambahan::query()->where('id_tempat', $id)->get(['nama_biaya', 'nominal']), 'pembayaran' => $rules?->sistem_pembayaran, 'pembatalan' => $rules?->ketentuan_pembatalan];
+            $terms = $item->bookingTerms();
+            $terms['estimate'] = BookingEstimate::calculate($dates['tanggal_mulai'], $dates['tanggal_selesai'], $terms);
+            if (! $terms['estimate']['eligible']) {
+                throw ValidationException::withMessages(['tanggal_selesai' => 'Durasi sewa minimal '.$terms['durasi_minimal'].'. Pilih tanggal selesai paling cepat '.$terms['estimate']['minimum_end'].'.']);
+            }
             $bid = Booking::create($dates + ['ringkasan_sewa' => $terms] + ['id_tempat' => $id, 'id_penyewa' => $r->user()->id, 'status_booking' => 'MENUNGGU_KONFIRMASI'])->getKey();
             Marketplace::status($item, 'MENUNGGU_KONFIRMASI', $r->user()->id);
             Marketplace::notify($item->id_pemilik, 'Booking baru', $r->user()->name.' mengajukan booking untuk '.$item->nama_tempat.'.', 'BOOKING');
@@ -40,7 +60,7 @@ class BookingController extends Controller
         $owner = $r->user()->peran === 'PEMILIK';
         $b = Booking::forUser($r->user())->with(['tempat', 'penyewa'])->findOrFail($id);
 
-        return view('market.booking-detail', ['b' => $b, 'owner' => $owner, 'terms' => $b->ringkasan_sewa]);
+        return view('market.booking-detail', ['b' => $b, 'owner' => $owner, 'terms' => $b->ringkasan_sewa, 'estimate' => $b->costEstimate()]);
     }
 
     public function history(Request $r)

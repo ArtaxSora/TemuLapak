@@ -54,7 +54,22 @@ class AccountController extends Controller
     public function register(Request $r)
     {
         $data = $this->identity($r);
-        $extra = $r->validate(['peran' => 'required|in:PENYEWA,PEMILIK', 'password' => 'required|string|min:8|max:72|confirmed']);
+        $extra = $r->validate([
+            'peran' => 'required|in:PENYEWA,PEMILIK',
+            'no_telepon' => 'required|string|regex:/^[0-9]{10,15}$/',
+            'password' => [
+                'required', 'string', 'min:8', 'max:72',
+                'regex:/\p{Lu}/u', 'regex:/\p{Ll}/u', 'regex:/[\p{P}\p{S}]/u',
+                function ($attribute, $value, $fail) {
+                    if (is_string($value) && strlen($value) > 72) {
+                        $fail('Kata sandi terlalu panjang, gunakan maksimal 72 byte.');
+                    }
+                },
+            ],
+        ], [
+            'password.regex' => 'Kata sandi wajib mengandung huruf besar, huruf kecil, dan simbol khusus.',
+            'no_telepon.regex' => 'Nomor telepon harus terdiri dari 10 sampai 15 digit angka.',
+        ]);
         $user = new User;
         $user->forceFill($data + $extra)->save();
         Auth::login($user->refresh());

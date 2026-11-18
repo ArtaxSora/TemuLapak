@@ -55,7 +55,7 @@ test('a listing goes from owner submission to verification, booking and review',
 });
 
 test('registration restricts privileged roles and deactivated accounts lose access', function () {
-    $data = ['name' => 'Pengguna', 'no_telepon' => '08123456789', 'email' => 'tester@example.test', 'password' => 'testSecret2026', 'password_confirmation' => 'testSecret2026'];
+    $data = ['name' => 'Pengguna', 'no_telepon' => '08123456789', 'email' => 'tester@example.test', 'password' => 'testSecret2026!'];
     $this->post('/daftar', $data + ['peran' => 'ADMIN'])->assertSessionHasErrors('peran');
     $this->post('/daftar', $data + ['peran' => 'PEMILIK'])->assertRedirect('/dashboard');
     $this->get('/profil')->assertOk();
